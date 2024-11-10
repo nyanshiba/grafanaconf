@@ -16,3 +16,7 @@ MinecraftのMSPTを取得するシェルスクリプト。
 ### sflow-collector.sh
 
 NEC IX2000/3000シリーズのsFlow フローサンプルをGrafanaに表示するために、sFlow Collectorとして振る舞うシェルスクリプト。  
+
+### unbound-stats.sh
+
+unbound-controlのextended-statisticsを使って、QTYPEやRCODEを収集するシェルスクリプト。
