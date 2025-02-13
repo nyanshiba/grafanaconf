@@ -60,7 +60,9 @@ loki_url="http://loki.nuc.home.arpa:3100/loki/api/v1/push"
     expect eof
 
 END
-) | grep -oP --line-buffered "a1 $sensor_id 00 \K(\w+\s){6}" | while read -r bytes; do
+# low battery warning: a1 sensor_id 00 02 a3 07 d7 09 40 00 3c 01 2d
+# fully charged      : a1 sensor_id 01 02 b1 07 c8 08 ec 00 0a 01 80
+) | grep -oP --line-buffered "a1 $sensor_id 0\d \K(\w+\s){10}" | while read -r bytes; do
     # rate limit based on CO2
     if [ "${bytes:0:5}" != "${prev_bytes:0:5}" ]; then
         epoch_time=$(date +%s%N)
@@ -80,6 +82,8 @@ END
 
         celsius_temp=`echo ${air_list[1]} | sed 's/..$/.&/'`
         humidity=`echo ${air_list[2]} | sed 's/..$/.&/'`
+        batteryraw=`echo "$bytes" | sed 's/.* //'`
+        battery=`echo $(((0x$batteryraw * 0x64) >> 7))`
 
         json_payload=$(cat <<EOF
 {
@@ -106,6 +110,14 @@ END
       },
       "values": [
         [ "$epoch_time", "$humidity" ]
+      ]
+    },
+    {
+      "stream": {
+        "label": "battery"
+      },
+      "values": [
+        [ "$epoch_time", "$battery" ]
       ]
     }
   ]
