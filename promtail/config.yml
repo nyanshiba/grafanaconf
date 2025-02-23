@@ -58,5 +58,31 @@ scrape_configs:
         target_label: 'app_name'
       - source_labels: ['__syslog_message_proc_id']
         target_label: 'proc_id'
-      - source_labels: ['__syslog_message_msg_id']
-        target_label: 'msg_id'
+  - job_name: iap
+    syslog:
+      listen_address: 0.0.0.0:3165
+      listen_protocol: udp
+      syslog_format: "rfc3164"
+      label_structured_data: false
+      labels:
+        job: "syslog"
+    pipeline_stages:
+      - drop:
+          expression: 'awc_init_connection|PAPI_Send'
+      - regex:
+          expression: '^[\d+.]+\s(?P<app_name>\w+)\[\d+\]:\s<(?P<proc_id>\d+)>\s<\w+>\sAP:(?P<ap>[\w:]+)\s<.+?>(?P<message>.*)$'
+      - drop:
+          source: 'proc_id'
+          expression:  '341101|326274|326276|341201|404400|404401|541004'
+      - labels:
+          app_name:
+          proc_id:
+      - output:
+          source: message
+      - labeldrop:
+        - __syslog_message_hostname
+    relabel_configs:
+      - source_labels: ['__syslog_connection_ip_address']
+        target_label: 'ip_address'
+      - source_labels: ['__syslog_message_severity']
+        target_label: 'severity'
