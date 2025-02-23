@@ -23,8 +23,18 @@ scrape_configs:
       labels:
         job: "syslog"
     pipeline_stages:
-      - regex:
-          expression: '^(inbound|BLOCK).+?(?P<ip>[\d.]+).*'
+      - match:
+          selector: '{app_name="NAT", proc_id="061"}'
+          stages:
+            - regex:
+                expression: '^inbound.+?(?P<ip>[\d.]+).*'
+      - match:
+          selector: '{app_name="FLT", proc_id="008"}'
+          stages:
+            - drop:
+                expression: '2a04:4e42:'
+            - regex:
+                expression: '^BLOCK.+?\[(?P<ip>[\w:]+).*'
       - geoip:
           db: /usr/share/GeoIP/GeoLite2-City.mmdb
           source: ip
@@ -33,6 +43,7 @@ scrape_configs:
           - geoip_city_name
           - geoip_continent_code
           - geoip_continent_name
+          - geoip_postal_code
           - geoip_subdivision_code
           - geoip_subdivision_name
           - geoip_timezone
