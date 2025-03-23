@@ -14,7 +14,7 @@ loki_url="http://loki.nuc.home.arpa:3100/loki/api/v1/push"
 
     set sensor_address "00:53:FE:DC:BA:98"
 
-    set prompt "#"
+    set prompt ">"
     set timeout -1
 
     spawn bluetoothctl
