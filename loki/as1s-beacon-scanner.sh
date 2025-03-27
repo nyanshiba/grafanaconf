@@ -1,18 +1,10 @@
 #!/bin/bash
 # https://stackoverflow.com/a/52012231
 
-if [ "$(id -u)" != "0" ]; then
-    echo "ERROR: must run as root"
-    exit 1
-fi
-
-max_co2=900 # ppm (decimal)
-sensor_id="00 FF" # Sensor 4095 (hex)
-loki_url="http://loki.nuc.home.arpa:3100/loki/api/v1/push"
+sensor_id="0F FF" # Sensor 4095 (hex)
+loki_url="http://loki.home.arpa:3100/loki/api/v1/push"
 
 (cat <<'END' | /usr/bin/expect
-
-    set sensor_address "00:53:FE:DC:BA:98"
 
     set prompt ">"
     set timeout -1
@@ -20,38 +12,14 @@ loki_url="http://loki.nuc.home.arpa:3100/loki/api/v1/push"
     spawn bluetoothctl
 
     expect -re $prompt
-    send "scan off\r"
+    send "menu monitor\r"
 
     expect -re $prompt
-    send "remove *\r"
-
-    expect -re $prompt
-    send "menu scan\r"
-
-    expect -re $prompt
-    send "clear\r"
-
-    expect -re $prompt
-    send "transport le\r"
-
-    expect -re $prompt
-    send "duplicate-data on\r"
-
-    expect -re $prompt
-    send "pattern $sensor_address\r"
-
-    expect -re $prompt
-    send "back\r"
-
-    expect -re $prompt
-    send "scan on\r"
+    send "add-or-pattern 0 255 6509\r"
 
     trap {
         expect -re $prompt
-        send "scan off\r"
-
-        expect -re $prompt
-        send "remove *\r"
+        send "remove-pattern all\r"
 
         expect -re $prompt
         send "quit\r"
