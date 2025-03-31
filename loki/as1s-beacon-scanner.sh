@@ -50,6 +50,12 @@ END
 
         celsius_temp=`echo ${air_list[1]} | sed 's/..$/.&/'`
         humidity=`echo ${air_list[2]} | sed 's/..$/.&/'`
+
+        # cf. https://komoriss.com/relative-humidity-volumetric-humidity/
+        e=$(awk "BEGIN {print 6.1078 * (10 ^ ((7.5 * $celsius_temp) / (237.3 + $celsius_temp)))}")
+        a=$(awk "BEGIN {print (217 * $e) / ($celsius_temp + 273.15)}")
+        volumetric_humidity=$(awk "BEGIN {print $a * ($humidity / 100)}")
+
         batteryraw=`echo "$bytes" | sed 's/.* //'`
         battery=`echo $(((0x$batteryraw * 0x64) >> 7))`
 
@@ -78,6 +84,14 @@ END
       },
       "values": [
         [ "$epoch_time", "$humidity" ]
+      ]
+    },
+    {
+      "stream": {
+        "label": "volumetric_humidity"
+      },
+      "values": [
+        [ "$epoch_time", "$volumetric_humidity" ]
       ]
     },
     {
