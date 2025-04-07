@@ -32,14 +32,16 @@ scrape_configs:
           selector: '{app_name="NAT", proc_id="061"}'
           stages:
             - regex:
-                expression: '^inbound.+?(?P<ip>[\d.]+).*'
+                expression: '^inbound packet dropped, (tcp|udp) (?P<ip>[\d.]+):.+?:(?P<dport>[\d.]+).*'
       - match:
-          selector: '{app_name="FLT", proc_id="008"}'
+          selector: '{app_name="FLT"}'
           stages:
             - drop:
-                expression: '2a04:4e42:'
+                expression: ':443\s>'
             - regex:
-                expression: '^BLOCK.+?\[(?P<ip>[\w:]+).*'
+                expression: '^BLOCK \w+ \[?(?P<ip>\w+:[^\]]+|[\d.]+).+?(:(?P<dport>\d+))?,.+0\.\d in$'
+      - labels:
+          dport:
       - geoip:
           db: /usr/share/GeoIP/GeoLite2-City.mmdb
           source: ip
