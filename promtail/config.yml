@@ -24,6 +24,11 @@ scrape_configs:
         job: "syslog"
     pipeline_stages:
       - match:
+          selector: '{app_name="ICP6", proc_id="075"}'
+          stages:
+            - drop:
+                expression: '> fe80::'
+      - match:
           selector: '{app_name="NAT", proc_id="061"}'
           stages:
             - regex:
