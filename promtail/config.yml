@@ -77,6 +77,22 @@ scrape_configs:
       - labels:
           app_name:
           proc_id:
+      - match:
+          selector: '{proc_id="326272"}'
+          stages:
+            - regex:
+                expression: '= (?P<channel>\d+) SSID.*$'
+      - match:
+          selector: '{proc_id="404402"}'
+          stages:
+            - regex:
+                expression: 'Type (?P<type>.*?) Signal (?P<signal>\d+) Freq (?P<freq>\d+)KHz Bandwidth (?P<bandwidth>\d+)KHz$'
+      - labels:
+          channel:
+          type:
+          signal:
+          freq:
+          bandwidth:
       - output:
           source: message
       - labeldrop:
